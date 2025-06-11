@@ -1,3 +1,5 @@
+# 검색할 벡터 임베딩 및 Qdrant 업로드 스크립트
+
 import os
 import json
 from tqdm import tqdm

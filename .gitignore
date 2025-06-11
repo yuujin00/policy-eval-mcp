@@ -163,3 +163,7 @@ cython_debug/
 
 # Project-specific settings
 .aider*
+
+
+# Dummy files
+dummy/
