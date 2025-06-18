@@ -1,12 +1,13 @@
+# pdf_to_text.py
 # PDF 파일에서 표와 줄바꿈을 보존하여 텍스트 추출
 
 import os
 import pdfplumber
 
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))  # 프로젝트 루트
+input_dir = os.path.join(BASE_DIR, "data", "evaluation")
+
 def extract_text_preserve_all(pdf_path: str, output_path: str = None):
-    """
-    표·줄바꿈 보존 포함 전체 텍스트 추출
-    """
     if not os.path.exists(pdf_path):
         raise FileNotFoundError(f"📂 파일이 존재하지 않습니다: {pdf_path}")
 
@@ -29,8 +30,6 @@ def extract_text_preserve_all(pdf_path: str, output_path: str = None):
         return result
 
 if __name__ == "__main__":
-    # 📌 자동화 경로: evaluation/ 폴더 안의 모든 PDF 파일을 텍스트로 변환
-    input_dir = "data/evaluation"
     for filename in os.listdir(input_dir):
         if filename.endswith(".pdf"):
             pdf_path = os.path.join(input_dir, filename)
