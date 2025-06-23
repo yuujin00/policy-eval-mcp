@@ -1,3 +1,6 @@
+# structured_split.py
+# pdf 파일에서 추출한 텍스트를 구조화된 JSONL 형식으로 분할 저장
+# 2번
 import os
 import re
 import json

@@ -1,5 +1,6 @@
 # pdf_to_text.py
 # PDF 파일에서 표와 줄바꿈을 보존하여 텍스트 추출
+# 1번
 
 import os
 import pdfplumber

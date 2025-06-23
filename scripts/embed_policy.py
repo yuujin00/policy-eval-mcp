@@ -1,3 +1,5 @@
+# embed_policy.py
+# 정책 문서를 임베딩하고 Qdrant에 업로드 -> 유사도를 위한 검색 준비이지만, 이를 메모리에만 둘거면 필요 없음.
 import os
 import json
 from tqdm import tqdm
