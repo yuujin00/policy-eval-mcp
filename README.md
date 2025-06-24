@@ -87,3 +87,16 @@ fastmcp dev src/mcp_server_qdrant/server.py
 
 ---
 
+&nbsp;
+
+# 🖥️ Streamlit UI 사용 방법
+
+### 3. Streamlit UI 실행
+
+> **사전 조건**  
+> - 앞 단계(0 ~ 2)에서 Qdrant 벡터 DB + MCP 서버가 **실행 중**이어야 합니다.  
+> - `requirements.txt`에 포함된 Streamlit 관련 의존성이 이미 설치돼 있어야 합니다.
+
+```bash
+# Streamlit 앱 실행
+streamlit run streamlit_ui.py --server.port 8501
