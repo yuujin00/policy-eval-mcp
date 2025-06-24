@@ -167,3 +167,7 @@ cython_debug/
 
 # Dummy files
 dummy/
+
+# logs
+logs/
+scripts/private_eval.log

@@ -1,0 +1,8 @@
+# config_job.yaml
+# 파일 경로 설정
+
+pdf_path: data/evaluation/mypolicy.pdf
+text_path: data/evaluation/mypolicy.txt
+structured_path: data/evaluation_structured/mypolicy_structured.jsonl
+cross_reference_path: results/mypolicy_cross_reference.jsonl
+eval_result_path: results/mypolicy_eval_result.jsonl

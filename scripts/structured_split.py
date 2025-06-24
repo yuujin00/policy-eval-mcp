@@ -1,15 +1,8 @@
-# structured_split.py
-# pdf 파일에서 추출한 텍스트를 구조화된 JSONL 형식으로 분할 저장
-# 2번
+# scripts/structured_split.py
+# Streamlit 평가 흐름에 맞춰 TXT → 구조화 JSONL 분할
 import os
 import re
 import json
-
-# ✅ 경로 설정
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-input_dir = os.path.join(ROOT_DIR, "data", "evaluation")
-output_dir = os.path.join(ROOT_DIR, "data", "evaluation_structured")
-os.makedirs(output_dir, exist_ok=True)
 
 def process_file(input_path: str, output_path: str):
     with open(input_path, "r", encoding="utf-8") as f:
@@ -39,7 +32,6 @@ def process_file(input_path: str, output_path: str):
         next_line = lines[i + 1].strip() if i + 1 < len(lines) else ""
 
         if re.match(r"^\d{1,2}\.\s", line):
-            # 다음 줄도 제목처럼 보이면 합침
             if (not re.match(r"^\d{1,2}\.\s", next_line)) and next_line and len(next_line) < 60 and not re.search(r'[.가-힣]{3,}', next_line):
                 toc_lines.append(f"{line} {next_line}")
                 i += 2
@@ -77,20 +69,17 @@ def process_file(input_path: str, output_path: str):
             "text": chunk_text
         })
 
-    # ✅ 저장
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f_out:
         for item in chunks:
             json.dump(item, f_out, ensure_ascii=False)
             f_out.write("\n")
 
-    print(f"✅ 저장 완료: {output_path}")
-    print(f"📄 총 {len(chunks)}개의 항목을 저장했습니다.")
+    print(f"저장 완료: {output_path}")
+    print(f"총 {len(chunks)}개의 항목을 저장했습니다.")
 
-# ✅ 폴더 내 모든 txt 처리
+# ✅ CLI 테스트용 (Streamlit에서는 subprocess로 호출됨)
 if __name__ == "__main__":
-    for filename in os.listdir(input_dir):
-        if filename.endswith(".txt"):
-            input_path = os.path.join(input_dir, filename)
-            output_path = os.path.join(output_dir, filename.replace(".txt", "_structured.jsonl"))
-            process_file(input_path, output_path)
-            print(f"📄 처리 완료: {filename} → {output_path}")
+    input_path = "data/evaluation/uploaded_policy.txt"
+    output_path = "data/evaluation_structured/uploaded_policy_structured.jsonl"
+    process_file(input_path, output_path)
