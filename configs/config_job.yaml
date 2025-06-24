@@ -5,4 +5,5 @@ pdf_path: data/evaluation/mypolicy.pdf
 text_path: data/evaluation/mypolicy.txt
 structured_path: data/evaluation_structured/mypolicy_structured.jsonl
 cross_reference_path: results/mypolicy_cross_reference.jsonl
+structured_llm_path: data/evaluation_structured/mypolicy_structured_llm.jsonl
 eval_result_path: results/mypolicy_eval_result.jsonl
