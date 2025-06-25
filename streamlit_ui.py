@@ -107,39 +107,62 @@ for rec in records:
 # ────────────────── 4. 항목별 요약 테이블 ──────────────────
 crit_raw = json.loads(CRITERIA_PATH.read_text(encoding="utf-8"))
 criteria = crit_raw["criteria"] if isinstance(crit_raw, dict) else crit_raw
-criteria = [c for c in criteria if isinstance(c, dict) and "id" in c]
+criteria_list  = [c for c in criteria if isinstance(c, dict) and "id" in c]
 
-id_map: dict[int, tuple[str,str]] = {}
-for c in criteria:
+id_map = {}
+for c in criteria_list:
     try:
-        cid = int(c["id"])
-    except Exception:
-        continue
-    id_map[cid] = (f"{cid:02d}. {c['title'].strip()}", c.get("level", ""))
+        cid = int(c["id"])          # "01" → 1
+    except (ValueError, TypeError):
+        continue                    # 숫자가 아니면 건너뜀
+    title = c["title"].strip()      # 앞뒤 공백 제거
+    id_map[cid] = (f"{cid:02d}. {title}", c.get("level", ""))
 
-title_to_id = {title: cid for cid,(title,_) in id_map.items()}
+title_to_id = {title: cid for cid, (title, _) in id_map.items()}
 
-bucket: defaultdict[int, list] = defaultdict(list)
-for r in (rec for rec in records if isinstance(rec, dict)):
+# ① records 에 dict 아닌 요소 제거
+records = [r for r in records if isinstance(r, dict)]
+
+# ② 항목별 결과 집계 (id 기준)
+from collections import defaultdict
+bucket = defaultdict(list)
+for r in records:
     res = r.get("result", {})
-    raw_key = res.get("항목")
-    key_id  = raw_key if isinstance(raw_key,int) else title_to_id.get(raw_key)
-    if key_id:
-        bucket[key_id].append((res.get("준수"), r.get("eval_id")))
+    raw_key = res.get("항목")               # '01. …' 또는 정수 id
+    key_id  = raw_key if isinstance(raw_key, int) else title_to_id.get(raw_key)
+    if key_id is None:                      # 기준표에 없는 값이면 건너뜀
+        continue
+    bucket[key_id].append((res.get("준수"), r.get("eval_id")))
 
-summary = {"항목":[],"level":[],"기재여부":[],"문장ID":[],"비고":[]}
+summary = {"항목": [], "level": [], "준수": [], "문장ID": [], "비고": []}
+
 for cid in sorted(id_map):
-    title,lvl = id_map[cid]
+    title, lvl = id_map[cid]
     hits = bucket.get(cid, [])
-    comp = ",".join(h for h,_ in hits)
-    ids  = ",".join(str(i) for _,i in hits)
-    remark = "필수기재위반" if lvl.startswith("필수") and not ids else ""
+
+    # ① 준수 값 • eval_id 모두 공백 제거
+    clean_hits = [((h or "").strip(), str(i or "").strip()) for h, i in hits]
+
+    # ② 중복 제거 후 정렬 → "O,X" / "X" …
+    statuses = sorted({h for h, _ in clean_hits if h})
+    comp     = ",".join(statuses)
+
+    # ③ 문장 ID (공백·None 제외)
+    ids = ",".join(i for _, i in clean_hits if i)
+
+    has_x = "X" in statuses
+
+    r1 = "필수기재위반"     if lvl.startswith("필수") and not ids else ""
+    r2 = "해당여부판단필요" if lvl.startswith("해당시") and not ids else ""
+    r3 = "처리방침변경필요" if has_x else ""
+    remark = ",".join(t for t in (r1, r2, r3) if t)
+
     summary["항목"].append(title)
     summary["level"].append(lvl)
-    summary["기재여부"].append(comp)
-    summary["문장ID"].append(ids)
+    summary["준수"].append(comp)      # ← 이제 X 도 정확히 보임
+    summary["문장ID"].append(ids)     # ← 문장 ID 도 사라지지 않음
     summary["비고"].append(remark)
-
+    
 df = pd.DataFrame(summary)
 st.subheader("📊 처리방침 기재항목별 요약")
 st.dataframe(df, use_container_width=True)
